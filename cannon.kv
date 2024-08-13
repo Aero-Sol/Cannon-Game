@@ -1,0 +1,211 @@
+<CannonGame>:
+    # Main layout for the game
+    orientation: 'vertical'
+    
+    # ScrollView to allow scrolling when content exceeds the screen height
+    ScrollView:
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: None
+            height: self.minimum_height  # Adjust the height dynamically based on content
+            
+            # Angle and Velocity controls
+            BoxLayout:
+                size_hint_y: None
+                height: 50
+                Label:
+                    text: 'Angle:'
+                    size_hint_x: None
+                    width: 100
+                Slider:
+                    min: 0
+                    max: 90
+                    value: root.angle
+                    on_value: root.angle = self.value
+                Label:
+                    text: str(round(root.angle, 2))
+                    size_hint_x: None
+                    width: 50
+                Label:
+                    text: 'Velocity:'
+                    size_hint_x: None
+                    width: 100
+                Slider:
+                    min: 0
+                    max: 1000
+                    value: root.velocity
+                    on_value: root.velocity = self.value
+                Label:
+                    text: str(round(root.velocity, 2))
+                    size_hint_x: None
+                    width: 50
+            
+            # Type of Shot selection and Fire button
+            BoxLayout:
+                size_hint_y: None
+                height: 50
+                Label:
+                    text: 'Type of Shot:'
+                    size_hint_x: None
+                    width: 100
+                Spinner:
+                    text: root.type_of_shot
+                    values: ['Bullet', 'Bombshell', 'Laser']
+                    on_text: root.type_of_shot = self.text
+                    size_hint_y: None
+                    height: 30
+                Button:
+                    text: 'Fire'
+                    on_press: root.start_shot()
+                    size_hint_y: None
+                    height: 30
+
+            # Display Round, Score, and Shots
+            BoxLayout:
+                size_hint_y: None
+                height: 30
+                Label:
+                    text: 'Round: ' + str(root.round_number)
+                Label:
+                    text: 'Shots: ' + str(root.shots)
+
+    # Control buttons at the bottom
+    BoxLayout:
+        size_hint_y: None
+        height: 40
+        Button:
+            text: 'Save Game'
+            on_press: root.save_game()
+            size_hint_y: None
+            height: 30
+        Button:
+            text: 'Load Game'
+            on_press: root.load_game()
+            size_hint_y: None
+            height: 30
+        Button:
+            text: 'Hall of Fame'
+            on_press: root.show_hall_of_fame()
+            size_hint_y: None
+            height: 30
+        Button:
+            text: 'Help'
+            on_press: root.show_help()
+            size_hint_y: None
+            height: 30
+
+
+<EndGameContent>:
+    orientation: 'vertical'
+
+<HallOfFameContent>:
+    # Content for the hall of fame popup
+    orientation: 'vertical'
+    Label:
+        text: 'Hall of Fame'
+
+<HelpContent>:
+    # Content for the help popup
+    orientation: 'vertical'
+    Label:
+        text: 'Welcome to the Cannon Game!'
+        font_size: '20sp'
+        bold: True
+        size_hint_y: None
+        height: self.texture_size[1]
+
+    Label:
+        text: 'Adjust the angle and velocity of your cannon, and choose the type of shot.'
+        font_size: '16sp'
+        size_hint_y: None
+        height: self.texture_size[1]
+
+    Label:
+        text: 'Angle:'
+        font_size: '16sp'
+        size_hint_y: None
+        height: self.texture_size[1]
+
+    Label:
+        text: '- Use the slider to adjust the angle of your cannon.'
+        font_size: '14sp'
+        size_hint_y: None
+        height: self.texture_size[1]
+
+    Label:
+        text: 'Velocity:'
+        font_size: '16sp'
+        size_hint_y: None
+        height: self.texture_size[1]
+
+    Label:
+        text: '- Use the slider to adjust the velocity of your projectile.'
+        font_size: '14sp'
+        size_hint_y: None
+        height: self.texture_size[1]
+
+    Label:
+        text: 'Type of Shot:'
+        font_size: '16sp'
+        size_hint_y: None
+        height: self.texture_size[1]
+
+    Label:
+        text: '- Choose the type of shot: Bullet, Bombshell, or Laser.'
+        font_size: '14sp'
+        size_hint_y: None
+        height: self.texture_size[1]
+
+    Label:
+        text: 'Gameplay:'
+        font_size: '16sp'
+        size_hint_y: None
+        height: self.texture_size[1]
+
+    Label:
+        text: '- Fire your cannon to hit the target and earn points.'
+        font_size: '14sp'
+        size_hint_y: None
+        height: self.texture_size[1]
+
+    Label:
+        text: '- Each type of shot behaves differently:'
+        font_size: '14sp'
+        size_hint_y: None
+        height: self.texture_size[1]
+
+    Label:
+        text: '    • Bullet: Travels in a straight line. Effective against small targets.'
+        font_size: '14sp'
+        size_hint_y: None
+        height: self.texture_size[1]
+
+    Label:
+        text: '    • Bombshell: Explodes on impact, causing damage to a larger area.'
+        font_size: '14sp'
+        size_hint_y: None
+        height: self.texture_size[1]
+
+    Label:
+        text: '    • Laser: Travels instantaneously and destroys the target directly in its path.'
+        font_size: '14sp'
+        size_hint_y: None
+        height: self.texture_size[1]
+
+    Label:
+        text: '- Hit the target with a certain number of shots to proceed to the next round.'
+        font_size: '14sp'
+        size_hint_y: None
+        height: self.texture_size[1]
+
+    Label:
+        text: 'Options:'
+        font_size: '16sp'
+        size_hint_y: None
+        height: self.texture_size[1]
+
+    Label:
+        text: '- Save your progress or load a saved game.'
+        font_size: '14sp'
+        size_hint_y: None
+        height: self.texture_size[1]

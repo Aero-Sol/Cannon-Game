@@ -7,6 +7,7 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.uix.button import Button
+from kivy.core.audio import SoundLoader
 import math
 import json
 
@@ -17,11 +18,11 @@ FPS = 20
 BULLET_RADIUS = SCREEN_WIDTH / 100
 BOMB_RADIUS = SCREEN_WIDTH / 50
 LASER_DIST = SCREEN_WIDTH / 100
-GRAVITY = 98
+GRAVITY = 9.8 * 25
 
 # Projectile constants
-BULLET_MASS = SCREEN_WIDTH / 2
-BOMB_MASS = SCREEN_WIDTH / 3
+BULLET_MASS = SCREEN_WIDTH / 1.5
+BOMB_MASS = SCREEN_WIDTH / 2
 BULLET_MAX_VEL = BULLET_MASS
 BOMB_MAX_VEL = BOMB_MASS
 LASER_VEL = SCREEN_WIDTH / 1.5
@@ -57,7 +58,6 @@ class Obstacle:
 class Rock(Obstacle):
     """Rock obstacle class."""
     def draw(self, canvas):
-        """Draw the rock obstacle as a rectangle."""
         super().draw(canvas)  # Call the parent class's draw method
         with canvas:
             rect = Rectangle(source='assets/rock.png', pos=(self.x, self.y), size=(self.width, self.height))
@@ -67,7 +67,6 @@ class Rock(Obstacle):
 class BulletproofMirror(Obstacle):
     """BulletproofMirror obstacle class."""
     def draw(self, canvas):
-        """Draw the bulletproof mirror obstacle as a line."""
         super().draw(canvas)  # Call the parent class's draw method
         with canvas:
             Color(1, 0, 1)
@@ -78,7 +77,6 @@ class BulletproofMirror(Obstacle):
 class Perpetio(Obstacle):
     """Perpetio obstacle class."""
     def draw(self, canvas):
-        """Draw the Perpetio obstacle as a rectangle."""
         super().draw(canvas)  # Call the parent class's draw method
         with canvas:
             rect = Rectangle(source='assets/perpetio.png', pos=(self.x, self.y), size=(self.width, self.height))
@@ -88,7 +86,6 @@ class Perpetio(Obstacle):
 class Floor(Obstacle):
     """Floor obstacle class."""
     def draw(self, canvas):
-        """Draw the floor obstacle as a rectangle."""
         super().draw(canvas)  # Call the parent class's draw method
         with canvas:
             rect = Rectangle(source='assets/floor.png', pos=(self.x, self.y), size=(self.width, self.height))
@@ -100,7 +97,7 @@ class CannonGame(BoxLayout):
     angle = NumericProperty(45)
     velocity = NumericProperty(500)
     type_of_shot = StringProperty("Bullet")
-    score = NumericProperty(0)
+    
     shots = NumericProperty(0)
     shot_fired = BooleanProperty(False)
     round_number = NumericProperty(1)
@@ -133,6 +130,14 @@ class CannonGame(BoxLayout):
         self.init_graphics()
         self.setup_level()
         Clock.schedule_interval(self.update, 1.0 / FPS)
+        # Load background music and sound effects
+        self.background_music = SoundLoader.load('assets/BackgroundMusic.mp3')
+        if self.background_music:
+            self.background_music.volume = 0.5  
+            self.background_music.loop = True
+            self.background_music.play() 
+
+        self.hit_sound = SoundLoader.load('assets/HitSound.wav')
 
     def init_graphics(self):
         """Initialize the graphics."""
@@ -166,13 +171,21 @@ class CannonGame(BoxLayout):
         elif self.level == 2:
             self.obstacles.append(Perpetio(x=400, y=80, width=100, height=300))
         elif self.level == 3:
-            self.obstacles.append(Rock(x=400, y=230, width=10, height=200))
-            self.obstacles.append(Rock(x=420, y=230, width=30, height=150))
-            self.obstacles.append(Rock(x=440, y=380, width=20, height=40))
-            self.obstacles.append(Rock(x=500, y=230, width=20, height=40))
-            self.obstacles.append(Perpetio(x=400, y=80, width=150, height=150))
+            self.obstacles.append(Rock(x=300, y=180, width=20, height=200))
+            self.obstacles.append(Rock(x=320, y=180, width=30, height=150))
+            self.obstacles.append(Rock(x=290, y=380, width=150, height=40))
+            self.obstacles.append(Rock(x=500, y=180, width=20, height=40))
+            self.obstacles.append(Rock(x=420, y=180, width=30, height=200))
+            self.obstacles.append(Rock(x=380, y=180, width=30, height=150))
+            self.obstacles.append(Rock(x=550, y=180, width=50, height=210))
+            self.obstacles.append(Rock(x=460, y=180, width=20, height=40))
+            self.obstacles.append(Perpetio(x=300, y=80, width=300, height=100))
+            self.obstacles.append(Perpetio(x=300, y=500, width=300, height=150))
         elif self.level == 4:
-            self.obstacles.append(Perpetio(x=400, y=80, width=100, height=300))
+            self.obstacles.append(Rock(x=600, y=80, width=50, height=365))
+            self.obstacles.append(Rock(x=320, y=445, width=400, height=30))
+            self.obstacles.append(Rock(x=300, y=475, width=390, height=30))
+            self.obstacles.append(Perpetio(x=450, y=80, width=100, height=365))
             self.obstacles.append(BulletproofMirror(x=300, y=600, width=400, height=20))
         elif self.level == 5:
             self.obstacles.append(BulletproofMirror(x=100, y=600, width=300, height=20))
@@ -182,8 +195,10 @@ class CannonGame(BoxLayout):
             self.obstacles.append(Perpetio(x=250, y=80, width=50, height=250))
             self.obstacles.append(Perpetio(x=680, y=80, width=50, height=250))
         elif self.level == 6:
+            self.obstacles.append(Rock(x=660, y=400, width=20, height=200))
+            self.obstacles.append(Rock(x=700, y=400, width=20, height=40))
             self.obstacles.append(Perpetio(x=0, y=550, width=SCREEN_WIDTH, height=50))
-            self.obstacles.append(Perpetio(x=700, y=80, width=50, height=300))
+            self.obstacles.append(Perpetio(x=650, y=80, width=100, height=320))
 
         self.draw_obstacles()
 
@@ -200,7 +215,7 @@ class CannonGame(BoxLayout):
 
     def draw_projectile(self):
         """Draw the projectile."""
-        self.clear_projectiles() # Clear existing projectiles
+        self.clear_projectiles()
 
         with self.canvas:
             if self.type_of_shot == "Bullet":
@@ -226,7 +241,11 @@ class CannonGame(BoxLayout):
         self.projectile_x = 100
         self.projectile_y = 100
         self.shots += 1
-        if self.type_of_shot == "Laser":
+        if self.type_of_shot == "Bullet":
+            self.velocity = min(self.velocity, BULLET_MAX_VEL)
+        elif self.type_of_shot == "Bombshell":
+            self.velocity = min(self.velocity, BOMB_MAX_VEL)
+        elif self.type_of_shot == "Laser":
             self.velocity = LASER_VEL
         self.calculate_initial_velocity()
         self.draw_projectile()
@@ -247,11 +266,8 @@ class CannonGame(BoxLayout):
             elif self.type_of_shot == "Bombshell" and BOMB_GRAVITY:
                 self.projectile_velocity_y -= GRAVITY * dt
 
-            self.projectile_x += self.projectile_velocity_x * dt
-            self.projectile_y += self.projectile_velocity_y * dt
-        else:
-            self.projectile_x += self.projectile_velocity_x * dt
-            self.projectile_y += self.projectile_velocity_y * dt
+        self.projectile_x += self.projectile_velocity_x * dt
+        self.projectile_y += self.projectile_velocity_y * dt
 
         if self.projectile_x > SCREEN_WIDTH or self.projectile_y > SCREEN_HEIGHT:
             self.reset()
@@ -267,13 +283,11 @@ class CannonGame(BoxLayout):
             radius = BOMB_RADIUS 
         elif self.type_of_shot == "Laser":
             radius = LASER_DIST
-        else:
-            radius = 0  # Default case
 
         # Check collision with the target
         distance_to_target = math.sqrt((self.projectile_x - (self.target_x + self.target_radius)) ** 2 +
                                        (self.projectile_y - (self.target_y + self.target_radius)) ** 2)
-        if distance_to_target < radius + 100:  # Add extra margin for collision detection
+        if distance_to_target < radius + 75:  # Add target radius
             self.end_round()
             return
 
@@ -298,7 +312,7 @@ class CannonGame(BoxLayout):
                 Clock.schedule_once(self.remove_bombshell, 0.1)
             self.projectile_velocity_x = 0
             self.projectile_velocity_y = 0
-            obstacle.clear_drawing()  # remove the drawing of the rock
+            obstacle.clear_drawing()  
             self.obstacles.remove(obstacle)
         elif isinstance(obstacle, BulletproofMirror):
             if self.type_of_shot == "Laser":
@@ -353,13 +367,9 @@ class CannonGame(BoxLayout):
                 if distance_to_obstacle < penetration_radius:
                     obs.clear_drawing()
                     self.obstacles.remove(obs)
-        
-        if self.type_of_shot == "Bombshell":
-            self.projectile_x = penetration_x
-            self.projectile_y = penetration_y
-        else:
-            self.projectile_x = penetration_x
-            self.projectile_y = penetration_y
+
+        self.projectile_x = penetration_x
+        self.projectile_y = penetration_y
 
         if self.projectile_velocity_x == 0 and self.projectile_velocity_y == 0:
             self.reset()
@@ -377,11 +387,14 @@ class CannonGame(BoxLayout):
 
     def end_round(self):
         """End the round."""
+        # Play the hit sound
+        if self.hit_sound:
+            self.hit_sound.play()
         self.clear_obstacles()
 
         if self.round_number == 6:
             popup_content = EndGameContent(shots=self.shots, game_instance=self)
-            popup = Popup(title=f'Congratulations! You are a faggot!!!!! {self.shots}',
+            popup = Popup(title=f'Congratulations! You have beaten the game in {self.shots} shots!',
                           content=popup_content,
                           size_hint=(None, None), size=(400, 200))
             popup_content.popup = popup
